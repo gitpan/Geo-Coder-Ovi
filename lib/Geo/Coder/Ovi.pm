@@ -9,7 +9,7 @@ use JSON;
 use LWP::UserAgent;
 use URI;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 $VERSION = eval $VERSION;
 
 sub new {
@@ -26,10 +26,9 @@ sub new {
         $self->ua->set_my_handler(request_send  => $dump_sub);
         $self->ua->set_my_handler(response_done => $dump_sub);
     }
-
-    $self->{compress} = 1 unless exists $self->{compress};
-    $self->ua->default_header(accept_encoding => 'gzip,deflate')
-        if $self->{compress};
+    elsif (exists $self->{compress} ? $self->{compress} : 1) {
+        $self->ua->default_header(accept_encoding => 'gzip,deflate');
+    }
 
     return $self;
 }
@@ -93,7 +92,7 @@ __END__
 
 =head1 NAME
 
-Geo::Coder::Ovi - Geocode addresses with Ovi Maps
+Geo::Coder::Ovi - Geocode addresses with the Ovi Maps API
 
 =head1 SYNOPSIS
 
@@ -107,7 +106,7 @@ Geo::Coder::Ovi - Geocode addresses with Ovi Maps
 =head1 DESCRIPTION
 
 The C<Geo::Coder::Ovi> module provides an interface to the geocoding service
-of Ovi Maps through the unofficial (as-yet unpublished) REST API.
+of the Ovi Maps API.
 
 =head1 METHODS
 
@@ -117,11 +116,6 @@ of Ovi Maps through the unofficial (as-yet unpublished) REST API.
 
 Creates a new geocoding object.
 
-Accepts an optional B<language> parameter to specify the preferred language
-of the response. The language code is composed of the two-letter ISO-639
-abbreviation and an optional two-letter ISO-3166 country code.  Example
-values: 'en', 'en-US'.
-
 Accepts an optional B<ua> parameter for passing in a custom LWP::UserAgent
 object.
 
@@ -130,33 +124,38 @@ object.
     $location = $geocoder->geocode(location => $location)
     @locations = $geocoder->geocode(location => $location)
 
+Accepts an optional B<language> parameter to specify the preferred language
+of the response. The language code is composed of the two-letter ISO-639
+abbreviation and an optional two-letter ISO-3166 country code. Example
+values: 'en', 'en-US'.
+
 In scalar context, this method returns the first location result; and in
 list context it returns all location results.
 
 Each location result is a hashref; a typical example looks like:
 
-{
-    categories => [ { id => 9000284 } ],
-    properties => {
-        addrAreaotherName => "West Harrison",
-        addrCityName      => "Harrison",
-        addrCountryCode   => "USA",
-        addrCountryName   => "United States of America",
-        addrCountyName    => "Westchester",
-        addrHouseAlpha    => "",
-        addrHouseNumber   => 102,
-        addrPopulation    => 0,
-        addrPostalCode    => 10604,
-        addrStateName     => "New York",
-        addrStreetName    => "Corporate Park Dr",
-        geoLatitude       => "41.01945027709007",
-        geoLongitude      => "-73.72334106825292",
-        language          => "ENG",
-        title =>
-            "102 Corporate Park Dr, Harrison NY 10604, United States of America",
-        type => "Street",
-    },
-}
+    {
+        categories => [ { id => 9000284 } ],
+        properties => {
+            addrAreaotherName => "West Harrison",
+            addrCityName      => "Harrison",
+            addrCountryCode   => "USA",
+            addrCountryName   => "United States of America",
+            addrCountyName    => "Westchester",
+            addrHouseAlpha    => "",
+            addrHouseNumber   => 102,
+            addrPopulation    => 0,
+            addrPostalCode    => 10604,
+            addrStateName     => "New York",
+            addrStreetName    => "Corporate Park Dr",
+            geoLatitude       => "41.01945027709007",
+            geoLongitude      => "-73.72334106825292",
+            language          => "ENG",
+            title =>
+                "102 Corporate Park Dr, Harrison NY 10604, United States of America",
+            type => "Street",
+        },
+    }
 
 =head2 response
 
@@ -174,12 +173,7 @@ Accessor for the UserAgent object.
 
 =head1 SEE ALSO
 
-L<http://maps.ovi.com/>
-
-L<Geo::Coder::Bing>, L<Geo::Coder::Bing::Bulk>, L<Geo::Coder::Google>,
-L<Geo::Coder::Mapquest>, L<Geo::Coder::Multimap>, L<Geo::Coder::Navteq>,
-L<Geo::Coder::OSM>, L<Geo::Coder::PlaceFinder>, L<Geo::Coder::SimpleGeo>,
-L<Geo::Coder::TomTom>, L<Geo::Coder::Yahoo>
+L<http://api.maps.ovi.com/>
 
 =head1 REQUESTS AND BUGS
 
@@ -222,7 +216,7 @@ L<http://search.cpan.org/dist/Geo-Coder-Ovi/>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2010 gray <gray at cpan.org>, all rights reserved.
+Copyright (C) 2010-2011 gray <gray at cpan.org>, all rights reserved.
 
 This library is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

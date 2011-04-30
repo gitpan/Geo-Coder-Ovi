@@ -1,7 +1,7 @@
 --- #YAML:1.0
 name:               Geo-Coder-Ovi
-version:            0.01
-abstract:           Geocode addresses with Ovi Maps
+version:            0.02
+abstract:           Geocode addresses with the Ovi Maps API
 author:
     - gray <gray@cpan.org>
 license:            perl
