@@ -4,23 +4,29 @@ use Encode;
 use Geo::Coder::Ovi;
 use Test::More;
 
-plan tests => 8;
+unless ($ENV{OVI_APPID} and $ENV{OVI_TOKEN}) {
+    plan skip_all =>
+        'OVI_APIPID and OVI_TOKEN environment variables must be set';
+}
 
 my $debug = $ENV{GEO_CODER_OVI_DEBUG};
 unless ($debug) {
     diag "Set GEO_CODER_OVI_DEBUG to see request/response data";
 }
 
+GOTO:
+
 my $geocoder = Geo::Coder::Ovi->new(
-    debug    => $debug,
-    compress => 0,
+    appid => $ENV{OVI_APPID},
+    token => $ENV{OVI_TOKEN},
+    debug => $debug,
 );
 {
-    my $address = '2001 North Fuller Avenue, Los Angeles, CA';
+    my $address = '102 Corporate Park Dr, Harrison, NY';
     my $location = $geocoder->geocode($address);
     is(
         $location->{properties}{addrCityName},
-        'Los Angeles',
+        'Harrison',
         "correct city for $address"
     );
 }
@@ -56,7 +62,16 @@ my $geocoder = Geo::Coder::Ovi->new(
     my $city = decode('latin1', qq(Schm\xF6ckwitz));
     my $location = $geocoder->geocode("$city, Berlin, Germany");
     is(
-        $location->{properties}{addrCityName}, $city,
+        $location->{properties}{addrDistrictName}, $city,
         'decoded character encoding of response'
     );
 }
+
+# Test without appid and token.
+if ($ENV{OVI_APPID} and $ENV{OVI_TOKEN}) {
+    delete @ENV{qw(OVI_APPID OVI_TOKEN)};
+    diag 'Testing without appid and token';
+    goto 'GOTO';
+}
+
+done_testing;
